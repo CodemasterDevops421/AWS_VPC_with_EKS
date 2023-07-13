@@ -130,8 +130,6 @@ resource "aws_eks_cluster" "eks" {
     aws_iam_role_policy_attachment.AmazonEKSServicePolicy,
     aws_iam_role_policy_attachment.AmazonEKSVPCResourceController,
     aws_iam_role_policy_attachment.AmazonEKSVPCResourceController,
-    #aws_subnet.pub_sub1,
-    #aws_subnet.pub_sub2,
   ]
 
 }
@@ -144,9 +142,9 @@ resource "aws_eks_node_group" "backend" {
   subnet_ids = [var.subnet_ids[0],var.subnet_ids[1]]
   capacity_type = "ON_DEMAND"
   disk_size = "20"
-  instance_types = ["t2.small"]
+  instance_types = ["t2.micro"]
   remote_access {
-    ec2_ssh_key = "rtp-03"
+    ec2_ssh_key = "demo-03"
     source_security_group_ids = [var.sg_ids]
   } 
   
@@ -166,8 +164,6 @@ resource "aws_eks_node_group" "backend" {
     aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
-    #aws_subnet.pub_sub1,
-    #aws_subnet.pub_sub2,
   ]
 }
 
