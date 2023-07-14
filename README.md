@@ -26,9 +26,14 @@ To set up the EKS cluster using Terraform, follow these steps:
 To interact with the EKS cluster, you can use the Kubernetes command-line tool (`kubectl`). Configure `kubectl` to connect to the EKS cluster by following these steps:
 
 1. Install `kubectl` on your local machine by downloading it from the official Kubernetes website or using a package manager.
+    https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
+
 2. Retrieve the cluster's endpoint and authentication details by running `terraform output` in the `eks` directory.
+ 
 3. Set the cluster configuration in `kubectl` using the obtained details by running `kubectl config set-cluster <cluster-name> --server=<endpoint>` and `kubectl config set-credentials <cluster-name> --token=<authentication-token>`.
+  
 4. Set the current context to the EKS cluster by running `kubectl config use-context <cluster-name>`.
+ 
 5. Verify your connection to the cluster by running `kubectl get nodes` and confirming that the worker nodes are listed.
 
 ## Cleaning Up
