@@ -3,23 +3,23 @@ provider "aws" {
 }
 
 
-resource "aws_eip" "demo-eip" {
+resource "aws_eip" "kubectl-eip" {
   count    = 1
   domain   = "vpc"
-  instance = aws_instance.demo-server[count.index].id
+  instance = aws_instance.kubectl-server[count.index].id
 }
 
 
 
 
-resource "aws_instance" "demo-server" {
+resource "aws_instance" "kubectl-server" {
   count                       = 1
   ami                         = var.os_name
   key_name                    = var.key
   instance_type               = var.instance-type
   associate_public_ip_address = true
-  subnet_id                   = aws_subnet.demo_subnet-1.id
-  vpc_security_group_ids      = [aws_security_group.demo-vpc-sg.id]
+  subnet_id                   = aws_subnet.kubectl_subnet-1.id
+  vpc_security_group_ids      = [aws_security_group.kubectl-vpc-sg.id]
 
   user_data = <<-EOF
   #!/bin/bash
@@ -35,7 +35,7 @@ resource "aws_instance" "demo-server" {
   EOF
 
   tags = {
-    Name = "demo-server-${count.index}"
+    Name = "kubectl-server-${count.index}"
   }
 }
 
@@ -43,31 +43,31 @@ resource "aws_instance" "demo-server" {
 
 
 // Create VPC
-resource "aws_vpc" "demo-vpc" {
+resource "aws_vpc" "kubectl-vpc" {
   cidr_block = var.vpc-cidr
 }
 
 // Create Subnet
-resource "aws_subnet" "demo_subnet-1" {
-  vpc_id            = aws_vpc.demo-vpc.id
+resource "aws_subnet" "kubectl_subnet-1" {
+  vpc_id            = aws_vpc.kubectl-vpc.id
   cidr_block        = var.subnet1-cidr
   availability_zone = var.subent_az
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "demo_subnet1"
+    Name = "kubectl_subnet1"
   }
 }
 
 
-resource "aws_subnet" "demo_subnet-2" {
-  vpc_id            = aws_vpc.demo-vpc.id
+resource "aws_subnet" "kubectl_subnet-2" {
+  vpc_id            = aws_vpc.kubectl-vpc.id
   cidr_block        = var.subnet2-cidr
   availability_zone = var.subent-2_az
   map_public_ip_on_launch = true  
 
   tags = {
-    Name = "demo_subnet2"
+    Name = "kubectl_subnet2"
   }
 }
 
@@ -75,50 +75,50 @@ resource "aws_subnet" "demo_subnet-2" {
 
 // Create Internet Gateway
 
-resource "aws_internet_gateway" "demo-igw" {
-  vpc_id = aws_vpc.demo-vpc.id
+resource "aws_internet_gateway" "kubectl-igw" {
+  vpc_id = aws_vpc.kubectl-vpc.id
 
   tags = {
-    Name = "demo-igw"
+    Name = "kubectl-igw"
   }
 }
 
 
 // Create Route table resource
 
-resource "aws_route_table" "demo-rt" {
-  vpc_id = aws_vpc.demo-vpc.id
+resource "aws_route_table" "kubectl-rt" {
+  vpc_id = aws_vpc.kubectl-vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.demo-igw.id
+    gateway_id = aws_internet_gateway.kubectl-igw.id
   }
   tags = {
-    Name = "demo-rt"
+    Name = "kubectl-rt"
   }
 }
 
 // associate subnet with route table
 
-resource "aws_route_table_association" "demo-rt_association-1" {
-  subnet_id = aws_subnet.demo_subnet-1.id
+resource "aws_route_table_association" "kubectl-rt_association-1" {
+  subnet_id = aws_subnet.kubectl_subnet-1.id
 
-  route_table_id = aws_route_table.demo-rt.id
+  route_table_id = aws_route_table.kubectl-rt.id
 }
 
-resource "aws_route_table_association" "demo-rt_association-2" {
-  subnet_id = aws_subnet.demo_subnet-2.id
+resource "aws_route_table_association" "kubectl-rt_association-2" {
+  subnet_id = aws_subnet.kubectl_subnet-2.id
 
-  route_table_id = aws_route_table.demo-rt.id
+  route_table_id = aws_route_table.kubectl-rt.id
 }
 
 
 // create a security group
 
-resource "aws_security_group" "demo-vpc-sg" {
-  name = "demo-vpc-sg"
+resource "aws_security_group" "kubectl-vpc-sg" {
+  name = "kubectl-vpc-sg"
 
-  vpc_id = aws_vpc.demo-vpc.id
+  vpc_id = aws_vpc.kubectl-vpc.id
 
   ingress {
 
@@ -173,12 +173,12 @@ resource "aws_security_group" "demo-vpc-sg" {
 
 module "sgs" {
   source = "./sg_eks"
-  vpc_id = aws_vpc.demo-vpc.id
+  vpc_id = aws_vpc.kubectl-vpc.id
 }
 
 module "EKS" {
   source     = "./eks"
   sg_ids     = module.sgs.security_group_public
-  vpc_id     = aws_vpc.demo-vpc.id
-  subnet_ids = [aws_subnet.demo_subnet-1.id, aws_subnet.demo_subnet-2.id]
+  vpc_id     = aws_vpc.kubectl-vpc.id
+  subnet_ids = [aws_subnet.kubectl_subnet-1.id, aws_subnet.kubectl_subnet-2.id]
 }
